@@ -2,7 +2,7 @@
 // Basically, this is the same as From. The main difference is that this should return a Result type
 // instead of the target type itself.
 // You can read more about it at https://doc.rust-lang.org/std/convert/trait.TryFrom.html
-use std::convert::{TryInto, TryFrom};
+use std::convert::{TryFrom, TryInto};
 
 #[derive(Debug)]
 struct Color {
@@ -10,8 +10,6 @@ struct Color {
     green: u8,
     blue: u8,
 }
-
-// I AM NOT DONE
 
 // Your task is to complete this implementation
 // and return an Ok result of inner type Color.
@@ -25,7 +23,18 @@ struct Color {
 // Tuple implementation
 impl TryFrom<(i16, i16, i16)> for Color {
     type Error = String;
-    fn try_from(tuple: (i16, i16, i16)) -> Result<Self, Self::Error> {
+    fn try_from((r, g, b): (i16, i16, i16)) -> Result<Self, Self::Error> {
+        let try_parse = |val: i16| -> Result<u8, String> {
+            if std::u8::MIN as i16 <= val && val <= std::u8::MAX as i16 {
+                Ok(val as u8)
+            } else {
+                Err(String::from("Cant parse that"))
+            }
+        };
+        let red = try_parse(r)?;
+        let green = try_parse(g)?;
+        let blue = try_parse(b)?;
+        Ok(Self { red, green, blue })
     }
 }
 
@@ -33,6 +42,7 @@ impl TryFrom<(i16, i16, i16)> for Color {
 impl TryFrom<[i16; 3]> for Color {
     type Error = String;
     fn try_from(arr: [i16; 3]) -> Result<Self, Self::Error> {
+        Self::try_from((arr[0], arr[1], arr[2]))
     }
 }
 
@@ -40,6 +50,11 @@ impl TryFrom<[i16; 3]> for Color {
 impl TryFrom<&[i16]> for Color {
     type Error = String;
     fn try_from(slice: &[i16]) -> Result<Self, Self::Error> {
+        if slice.len() == 3 {
+            Self::try_from((slice[0], slice[1], slice[2]))
+        } else {
+            Err(String::from("Wrong number of arguments"))
+        }
     }
 }
 
